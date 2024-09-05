@@ -47,8 +47,10 @@ table {
 	border-spacing: 0;
 }
 
-
-
+h1,
+p {
+    text-shadow: 2px 2px 1px black;
+}
 
 body {
     font-family: "Raleway";
@@ -58,11 +60,15 @@ body {
     display: flex;
     align-items: center;
     gap: 10em;
-    margin: 1em;
+    padding: 1em;
+    margin-bottom: 2em;
+
+    color: white;
 }
 
 .header img {
     width: 7.5em;
+    stroke: black 10px solid;
 }
 
 .title-container {
@@ -87,6 +93,7 @@ body {
     flex-direction: column;
     margin: 1em;
     gap: 2em;
+    margin-right: 3em;
 }
 
 .primary-content-container h1 {
@@ -95,13 +102,44 @@ body {
 
 .weather-display {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     gap: 5em;
 }
 
 .weather-card {
+    border: 0.2em solid grey;
+    box-shadow: 10px 10px 10px grey;
+
+    color: white;
+}
+
+.inner-weather-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1em;
+    justify-content: center;
+    text-align: center;
+    gap: 3em;
+    padding: 2em;
+
+    background-color: rgba(230,230,230, 0.2);
+}
+
+.weather-card img {
+    width: 4em;
+}
+
+.weather-card h1 {
+    font-size: 3em;
+}
+
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    color: white;
+    text-align: center;
+
+    padding: 1.5em;
 }

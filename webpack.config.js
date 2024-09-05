@@ -9,7 +9,7 @@ module.exports = {
       new HtmlWebpackPlugin({
           template: './src/index.html',
       }),
-      new FaviconsWebpackPlugin('./src/images/cloudy.png')
+      new FaviconsWebpackPlugin('./src/images/partly-cloudy-day.png')
     ],
     output: {
       filename: 'main.js',
