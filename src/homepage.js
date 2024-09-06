@@ -11,6 +11,8 @@ import partlycloudydaygif from "./images/partlycloudyday.gif";
 
 import getLocationData from "./weather-api";
 
+let finalLocationData;
+
 function createHomePage() {
     const main = document.getElementById("main");
     main.textContent = "";
@@ -49,6 +51,8 @@ function createHeader() {
             main.removeChild(oldMainContent[0]);
             main.appendChild(createPrimaryContent(searchBar.value));
             updateHeaderBackgroundImage();
+
+
         }
     }, false);
 
@@ -62,17 +66,26 @@ function createPrimaryContent(chosenWeatherLocation) {
 
     const locationData = getLocationData(chosenWeatherLocation);
     let secondaryContainer;
+    let currentDay = -1;
 
     locationData.then(function(data) {
-        console.log(data);
+        finalLocationData = data;
         data.days.forEach(element => {
+            currentDay++;
             const date = new Date(element.datetime);
             const dayName = date.toLocaleDateString('en-US', {weekday: 'long'});
-            weatherDisplay.appendChild(createWeatherCard(element.icon, dayName, element.temp, element.description));
+
+            const weatherCard = createWeatherCard(element.icon, dayName, element.temp, element.description);
+            weatherCard.value = currentDay;
+            weatherCard.addEventListener("mouseenter", () => {
+                secondaryContainer.textContent = "";
+                secondaryContainer.appendChild(createSecondaryContent(weatherCard.value));
+            }, false);
+            weatherDisplay.appendChild(weatherCard);
         });
 
-        secondaryContainer = createSecondaryContent(data);
-        //primaryContentContainer.appendChild(secondaryContainer);
+        secondaryContainer = createSecondaryContent(0);
+        primaryContentContainer.appendChild(secondaryContainer);
     })
     const primaryContentContainer = document.createElement("div");
     primaryContentContainer.classList.add("primary-content-container");
@@ -91,12 +104,40 @@ function createPrimaryContent(chosenWeatherLocation) {
     return primaryContentContainer;
 }
 
-function createSecondaryContent(locationData) {
+function createSecondaryContent(indexPos) {
     const secondaryContentContainer = document.createElement("div");
+    secondaryContentContainer.classList.add("secondary-content-container");
 
-    const paraTest = document.createElement("p");
-    paraTest.textContent = locationData.days;
-    return paraTest;
+    const contentContainerTitle = document.createElement("h1");
+    contentContainerTitle.textContent = "Hour-by-Hour";
+
+    const hourDisplay = document.createElement("div");
+    hourDisplay.classList.add("hour-display");
+
+    secondaryContentContainer.appendChild(contentContainerTitle);
+
+    const currentDate = new Date();
+    let currentHour;
+    if (indexPos != 0) {
+        currentHour = 9;
+    } else {
+        currentHour = currentDate.getHours();
+    }
+
+    for (let i=currentHour; i<24 && i<currentHour + 14; i++) {
+        const day = finalLocationData.days[indexPos].hours[i];
+        hourDisplay.appendChild(createHourCard(day.datetime, day.icon, day.temp, day.feelslike, day.precipprob, day.windspeed));
+    }
+
+    /*
+    locationData.days[0].hours.forEach(day => {
+        hourDisplay.appendChild(createHourCard(day.datetime, day.icon, day.temp, day.feelslike, day.tempmax, 
+            day.tempmin, day.precipprob, day.windspeed));
+    });
+    */
+
+    secondaryContentContainer.appendChild(hourDisplay);
+    return secondaryContentContainer;
 }
 
 function createWeatherCard(weatherIcon, weatherDisplay, temperature, desc) {
@@ -136,7 +177,7 @@ function assignWeatherIcon(weatherDesc) {
     switch(weatherDesc) {
         case "partly-cloudy-day": return partlycloudyday;
         case "rain": return rain;
-        default: return sunnyraincloudy;
+        default: return sun;
     }
 }
 
@@ -149,6 +190,48 @@ function assignWeatherBackground(weatherDesc) {
     }
 }
 
+function createHourCard(time, weatherIcon, temperature, feelsLikeTemp, precipatationPercentage, windSpeed) {
+    const hourCard = document.createElement("div");
+    hourCard.classList.add("hour-card");
+
+    const timeDisplay = document.createElement("h1");
+    timeDisplay.textContent = time;
+
+    const weatherIconDisplay = document.createElement("img");
+    weatherIconDisplay.src = assignWeatherIcon(weatherIcon);
+
+    const infoSection = document.createElement("div");
+    infoSection.classList.add("info-section");
+
+    const temperatureDisplay = document.createElement("p");
+    temperatureDisplay.textContent = "Temperature: " + temperature + "°C";
+
+    const feelsLikeTempDisplay = document.createElement("p");
+    feelsLikeTempDisplay.textContent = "Feels Like Temp: " + feelsLikeTemp + "°C";
+
+    /*
+    const maxTempDisplay = document.createElement("p");
+    maxTempDisplay.textContent = "Max Temp: " + maxTemp;
+
+    const minTempDisplay = document.createElement("p");
+    minTempDisplay.textContent = "Min Temp: " + minTemp;
+    */
+
+    const precipatationPercentageDisplay = document.createElement("p");
+    precipatationPercentageDisplay.textContent = "Precipatation: " + precipatationPercentage + "%";
+
+    const windSpeedDisplay = document.createElement("p");
+    windSpeedDisplay.textContent = "Wind Speed: " + windSpeed + "mph";
+
+    infoSection.append(temperatureDisplay, feelsLikeTempDisplay,
+        precipatationPercentageDisplay, windSpeedDisplay);
+    
+    hourCard.append(timeDisplay, weatherIconDisplay, infoSection);
+
+    return hourCard;
+
+}
+
 function updateHeaderBackgroundImage() {
     const header = document.getElementsByClassName("header");
     const weatherCards = document.getElementsByClassName("weather-card");
@@ -156,7 +239,7 @@ function updateHeaderBackgroundImage() {
     console.log("Update Header");
 }
 
-function createFooter() {
+function createFooter() {  
     const footer = document.createElement("div");
     footer.classList.add("footer");
     footer.style.backgroundImage = "url(" + sunnyGif + ")";
